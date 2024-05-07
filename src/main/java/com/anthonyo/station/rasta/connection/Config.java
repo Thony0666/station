@@ -20,7 +20,11 @@ public class Config {
     private String password;
 
     @Bean
-    public Connection connection() throws SQLException {
+    public Connection getConnection()  {
+        try {
         return DriverManager.getConnection(url,username,password);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
