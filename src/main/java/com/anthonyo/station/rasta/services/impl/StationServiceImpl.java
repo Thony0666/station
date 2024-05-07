@@ -8,6 +8,7 @@ import com.anthonyo.station.rasta.services.StationService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StationServiceImpl implements StationService {
@@ -29,12 +30,25 @@ public class StationServiceImpl implements StationService {
     }
 
     @Override
+    public Station updateStation(Station toUpdate) {
+        Optional <Station> station = stationRepository.findById(toUpdate.getId());
+
+        if (station.isPresent()){
+
+            return stationRepository.updateStation(toUpdate);
+        }
+        else {
+            throw new NotFoundException("Station Not Found");
+        }
+    }
+
+    @Override
     public List<Station> findAllStation() {
         return stationRepository.findAllStation();
     }
 
     @Override
     public Station findById(Integer id) {
-        return stationRepository.findById(id).orElseThrow(()->new NotFoundException("Station Not Found"));
+        return stationRepository.findById(id).orElseThrow(()-> new NotFoundException("Station Not Found"));
     }
 }

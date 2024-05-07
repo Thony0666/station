@@ -6,6 +6,7 @@ import java.util.List;
 
 public interface StationService {
     Station createStation(Station toCreate);
+    Station updateStation(Station toUpdate);
     List<Station> findAllStation();
 
     Station findById(Integer id);

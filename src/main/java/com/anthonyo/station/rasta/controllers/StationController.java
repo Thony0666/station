@@ -26,4 +26,8 @@ public class StationController {
     public Station getStationById(@PathVariable Integer id){
         return stationService.findById(id);
     }
+    @PutMapping("/put")
+    public Station updateStation(@RequestBody Station station){
+        return stationService.updateStation(station);
+    }
 }

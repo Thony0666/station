@@ -7,6 +7,7 @@ import java.util.Optional;
 
 public interface StationRepository {
     Station createStation(Station toCreate);
+    Station updateStation(Station toUpdate);
     List<Station> findAllStation();
     Optional <Station>findById(Integer id);
 }

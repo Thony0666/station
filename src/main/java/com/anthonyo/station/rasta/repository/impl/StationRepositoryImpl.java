@@ -44,6 +44,25 @@ public class StationRepositoryImpl implements StationRepository {
     }
 
     @Override
+    public Station updateStation(Station toUpdate) {
+        try {
+            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE station SET name=?,place=?,max_volume_gasoline=?,max_volume_diesel=?,max_volume_petrol=? WHERE id =?");
+            preparedStatement.setString(1, toUpdate.getName());
+            preparedStatement.setString(2, toUpdate.getPlace());
+            preparedStatement.setDouble(3, toUpdate.getMaxVolumeGasoline());
+            preparedStatement.setDouble(4, toUpdate.getMaxVolumeDiesel());
+            preparedStatement.setDouble(5, toUpdate.getMaxVolumePetrol());
+            preparedStatement.setInt(6,toUpdate.getId());
+            preparedStatement.executeUpdate();
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return toUpdate;
+    }
+
+    @Override
     public List<Station> findAllStation() {
         var stations=new ArrayList<Station>();
         try {
@@ -75,7 +94,7 @@ public class StationRepositoryImpl implements StationRepository {
             var preparedStatement = connection.prepareStatement("SELECT * FROM station WHERE id=?");
             preparedStatement.setInt(1,id);
             var resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
+            if (resultSet.next()) {
                 return Optional.of(
                         Station.builder()
                                 .id(resultSet.getInt("id"))
