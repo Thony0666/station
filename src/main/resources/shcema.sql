@@ -31,3 +31,5 @@ CREATE TABLE if not exists operation
     FOREIGN KEY (id_station ) REFERENCES Station (id),
     FOREIGN KEY (id_product) REFERENCES product (id)
 );
+
+SELECT p.name , o.date_operation , o.type , o.amounts FROM product AS p INNER JOIN operation ON o.id_product=p.id

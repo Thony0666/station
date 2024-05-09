@@ -1,7 +1,9 @@
 package com.anthonyo.station.rasta.repository.impl;
 
+import com.anthonyo.station.rasta.dtos.Facture;
+import com.anthonyo.station.rasta.entities.Operation;
 import com.anthonyo.station.rasta.entities.Station;
-import com.anthonyo.station.rasta.repository.StationRepository;
+import com.anthonyo.station.rasta.repository.OperationRepository;
 import org.springframework.stereotype.Repository;
 
 import java.sql.*;
@@ -10,23 +12,23 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public class StationRepositoryImpl implements StationRepository {
+public class OperationRepositoryImpl implements OperationRepository {
     private final Connection connection;
 
-    public StationRepositoryImpl(Connection connection) {
+    public OperationRepositoryImpl(Connection connection) {
         this.connection = connection;
     }
 
-
     @Override
-    public Station createStation(Station toCreate) {
+    public Operation createTransaction(Operation toCreate) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO station (name,place,max_volume_gasoline,max_volume_diesel,max_volume_petrol) VALUES (?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, toCreate.getName());
-            preparedStatement.setString(2, toCreate.getPlace());
-            preparedStatement.setDouble(3, toCreate.getMaxVolumeGasoline());
-            preparedStatement.setDouble(4, toCreate.getMaxVolumeDiesel());
-            preparedStatement.setDouble(5, toCreate.getMaxVolumePetrol());
+            PreparedStatement preparedStatement = connection.prepareStatement("INSERT INTO operation (id_station,id_product,type,quantity,amounts,date_operation) VALUES (?,?,?,?,?,?)", Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setInt(1, toCreate.getIdStation());
+            preparedStatement.setInt(2, toCreate.getIdProduct());
+            preparedStatement.setString(3, toCreate.getType());
+            preparedStatement.setDouble(4, toCreate.getQuantity());
+            preparedStatement.setDouble(5, toCreate.getAmounts());
+            preparedStatement.setTimestamp(6, Timestamp.valueOf(toCreate.getDateOperation()));
             int resultSet = preparedStatement.executeUpdate();
             if (resultSet > 0) {
                 ResultSet rs = preparedStatement.getGeneratedKeys();
@@ -40,59 +42,13 @@ public class StationRepositoryImpl implements StationRepository {
             throw new RuntimeException(e);
         }
 
-        return toCreate;
-
+        return toCreate ;
     }
 
     @Override
-    public Station updateStation(Station toUpdate) {
+    public Optional<Station> findByIdStation(Integer id) {
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("UPDATE station SET name=?,place=?,max_volume_gasoline=?,max_volume_diesel=?,max_volume_petrol=? WHERE id =?");
-            preparedStatement.setString(1, toUpdate.getName());
-            preparedStatement.setString(2, toUpdate.getPlace());
-            preparedStatement.setDouble(3, toUpdate.getMaxVolumeGasoline());
-            preparedStatement.setDouble(4, toUpdate.getMaxVolumeDiesel());
-            preparedStatement.setDouble(5, toUpdate.getMaxVolumePetrol());
-            preparedStatement.setInt(6,toUpdate.getId());
-            preparedStatement.executeUpdate();
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return toUpdate;
-    }
-
-    @Override
-    public List<Station> findAllStation() {
-        var stations=new ArrayList<Station>();
-        try {
-            var preparedStatement = connection.prepareStatement("SELECT * FROM station");
-            var resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
-                stations.add(
-                        Station.builder()
-                                .id(resultSet.getInt("id"))
-                                .name(resultSet.getString("name"))
-                                .place(resultSet.getString("place"))
-                                .maxVolumeGasoline(resultSet.getDouble("max_volume_gasoline"))
-                                .maxVolumeDiesel(resultSet.getDouble("max_volume_diesel"))
-                                .maxVolumePetrol(resultSet.getDouble("max_volume_petrol"))
-                                .build()
-                );
-            }
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-
-        return stations;
-    }
-
-    @Override
-    public Optional<Station> findById(Integer id) {
-        try {
-            var preparedStatement = connection.prepareStatement("SELECT * FROM station WHERE id=?");
+            var preparedStatement = connection.prepareStatement("SELECT * FROM sta WHERE id=?");
             preparedStatement.setInt(1,id);
             var resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -111,8 +67,50 @@ public class StationRepositoryImpl implements StationRepository {
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-
         return Optional.empty();
     }
 
+    @Override
+    public Optional<Station> findByIdProduct(Integer id) {
+        try {
+            var preparedStatement = connection.prepareStatement("SELECT * FROM  WHERE id=?");
+            preparedStatement.setInt(1,id);
+            var resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                return Optional.of(
+                        Station.builder()
+                                .id(resultSet.getInt("id"))
+                                .name(resultSet.getString("name"))
+                                .place(resultSet.getString("place"))
+                                .maxVolumeGasoline(resultSet.getDouble("max_volume_gasoline"))
+                                .maxVolumeDiesel(resultSet.getDouble("max_volume_diesel"))
+                                .maxVolumePetrol(resultSet.getDouble("max_volume_petrol"))
+                                .build()
+                );
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public List<Facture> getAllOperations () {
+        var factures=new ArrayList<Facture>();
+        try {
+            var preparedStatement = connection.prepareStatement("SELECT p.name , o.date_operation , o.type , o.amounts FROM product AS p INNER JOIN operation AS o ON o.id_product=p.id");
+            var resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                factures.add(
+                        new Facture(resultSet.getTimestamp("date_operation").toLocalDateTime(),resultSet.getString("name"),resultSet.getString("type"),resultSet.getDouble("amounts"))
+                );
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return factures;
+    }
 }

@@ -5,12 +5,11 @@ import com.anthonyo.station.rasta.exceptions.InternalServerException;
 import com.anthonyo.station.rasta.exceptions.NotFoundException;
 import com.anthonyo.station.rasta.repository.StationRepository;
 import com.anthonyo.station.rasta.services.StationService;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
+
 public class StationServiceImpl implements StationService {
     private final StationRepository stationRepository ;
     public StationServiceImpl(StationRepository stationRepository) {
@@ -22,6 +21,9 @@ public class StationServiceImpl implements StationService {
     public Station createStation(Station toCreate) {
 
         if (toCreate.getId()==null){
+            return stationRepository.createStation(toCreate);
+        }
+        if (toCreate.getName()!=""){
             return stationRepository.createStation(toCreate);
         }
         else {

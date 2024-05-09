@@ -2,6 +2,9 @@ package com.anthonyo.station.rasta.controllers;
 
 import com.anthonyo.station.rasta.entities.Station;
 import com.anthonyo.station.rasta.services.StationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -11,9 +14,11 @@ import java.util.List;
 public class StationController {
     private final StationService stationService;
 
-    public StationController(StationService stationService) {
+    @Autowired
+    public StationController(@Qualifier("stationService2") StationService stationService) {
         this.stationService = stationService;
     }
+
     @PostMapping("/create")
     public Station createStation (@RequestBody Station station){
         return stationService.createStation(station);
